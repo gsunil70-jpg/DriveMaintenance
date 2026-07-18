@@ -1,21 +1,16 @@
 """
 DriveMaintenance
 Recommendation Engine
-
-Converts duplicate groups into
-safe cleanup recommendations.
-
-No file operations.
-No deletion.
-Analysis only.
 """
+
+from analytics.src.canonical_scorer import CanonicalScorer
 
 
 class RecommendationEngine:
 
     def __init__(self):
-        pass
 
+        self.scorer = CanonicalScorer()
 
     def recommend(self, duplicate_group):
 
@@ -27,88 +22,129 @@ class RecommendationEngine:
         if not files:
 
             return {
+
                 "action": "IGNORE",
+
                 "reason": "No files found"
+
             }
 
+        #
+        # Score every file
+        #
 
-        backup_files = []
-        normal_files = []
-
+        ranked = []
 
         for file in files:
 
-            inside_backup = (
-                file.get("Inside Backup", "")
-                .upper()
-                == "TRUE"
+            ranked.append(
+
+                (
+                    self.scorer.score(file),
+                    file
+                )
+
             )
 
-            if inside_backup:
+        #
+        # Highest score first
+        #
 
-                backup_files.append(file)
+        ranked.sort(
 
-            else:
+            key=lambda item: item[0],
 
-                normal_files.append(file)
+            reverse=True
 
+        )
 
+        keep = ranked[0][1]
 
-        # Case 1:
-        # Backup copy exists
-        if backup_files and normal_files:
+        review = [
 
-            return {
+            item[1]
 
-                "action":
-                    "KEEP_BACKUP_REMOVE_NON_BACKUP",
+            for item in ranked[1:]
 
-                "reason":
-                    "Backup copy exists; "
-                    "non-backup duplicate requires review",
+        ]
 
-                "keep":
-                    [
-                        f.get("File ID")
-                        for f in backup_files
-                    ],
+        #
+        # Backup detection
+        #
 
-                "review":
-                    [
-                        f.get("File ID")
-                        for f in normal_files
-                    ]
+        backup_exists = any(
 
-            }
+            (
 
+                f.get(
+                    "Inside Backup",
+                    ""
+                ).upper()
 
+                == "TRUE"
 
-        # Case 2:
-        # Multiple copies but no backup
-        if len(files) > 1:
+            )
 
-            return {
+            for _, f in ranked
 
-                "action":
-                    "REVIEW",
+        )
 
-                "reason":
-                    "Multiple copies exist but "
-                    "no backup copy identified"
+        #
+        # Recommendation
+        #
 
-            }
+        if backup_exists:
 
+            action = "KEEP_BACKUP_REMOVE_NON_BACKUP"
 
+            reason = (
 
-        # Case 3:
-        # Nothing actionable
+                "Canonical copy selected "
+
+                "using scoring engine."
+
+            )
+
+        elif len(files) > 1:
+
+            action = "REVIEW"
+
+            reason = (
+
+                "Canonical copy selected "
+
+                "but no backup exists."
+
+            )
+
+        else:
+
+            action = "IGNORE"
+
+            reason = "Single file."
 
         return {
 
-            "action":
-                "IGNORE",
+            "action": action,
 
-            "reason":
-                "No cleanup recommendation"
+            "reason": reason,
+
+            "keep": [
+
+                keep.get("File ID")
+
+            ],
+
+            "review": [
+
+                f.get("File ID")
+
+                for f in review
+
+            ],
+
+            "canonical_score":
+
+                ranked[0][0]
 
         }
