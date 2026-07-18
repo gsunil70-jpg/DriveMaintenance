@@ -1,66 +1,73 @@
 """
 DriveMaintenance
-Unique Storage Runner
+Analytics Main Runner
 """
 
-from analytics.src.constants import CSV_FILE
+from pathlib import Path
+
 from analytics.src.csv_loader import CsvLoader
 from analytics.src.repository import DriveIndexRepository
-from analytics.src.unique_storage_analysis import UniqueStorageAnalyzer
+from analytics.src.duplicate_detector import DuplicateDetector
 
 
 def main():
 
-    loader = CsvLoader(CSV_FILE)
+    csv_file = (
+        Path(__file__).resolve().parent.parent
+        / "data"
+        / "DriveIndex_RC2.csv"
+    )
+
+    loader = CsvLoader(csv_file)
 
     rows = loader.load()
 
     repository = DriveIndexRepository(rows)
 
-    analyzer = UniqueStorageAnalyzer(repository)
-
-    result = analyzer.run()
-
-
     print()
 
     print("=" * 60)
-    print("UNIQUE STORAGE ANALYSIS")
+    print("REAL DUPLICATE ANALYSIS")
     print("=" * 60)
 
+    detector = DuplicateDetector(
+        repository
+    )
+
+    groups = detector.run()
 
     print()
 
     print(
-        f"Unique Files : {result['unique_count']:,}"
+        f"Duplicate Groups : {len(groups)}"
     )
-
-    print(
-        f"True Size MB : {result['total_size']/1024/1024:,.2f}"
-    )
-
 
     print()
 
-    print("Top MIME Types")
+    for group in groups[:20]:
 
-    for mime, size in result["mime_sizes"][:15]:
-
-        print(
-            f"{size/1024/1024:>12,.2f} MB  {mime}"
-        )
-
-
-    print()
-
-    print("Largest Unique Files")
-
-
-    for item in result["top_files"]:
+        print("-" * 60)
 
         print(
-            f"{item['size']/1024/1024:>10,.2f} MB  {item['name']}"
+            f"Copies: {group['count']}"
         )
+
+        seen_ids = set()
+
+        for file in group["files"]:
+
+            file_id = file.get("File ID")
+
+            if file_id in seen_ids:
+                continue
+
+            seen_ids.add(file_id)
+
+            print(
+                f"{file.get('Name')} | "
+                f"{file.get('Size')} | "
+                f"{file_id}"
+            )
 
 
 if __name__ == "__main__":
