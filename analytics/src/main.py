@@ -10,6 +10,7 @@ from analytics.src.repository import DriveIndexRepository
 from analytics.src.duplicate_detector import DuplicateDetector
 from analytics.src.duplicate_report_writer import DuplicateReportWriter
 from analytics.src.recommendation_engine import RecommendationEngine
+from analytics.src.action_queue_writer import ActionQueueWriter
 
 
 def main():
@@ -77,6 +78,28 @@ def main():
     )
 
     writer.write(groups)
+
+    action_queue_file = (
+        Path(__file__).resolve().parent.parent
+        / "reports"
+        / "action_queue.csv"
+    )
+
+
+    queue_writer = ActionQueueWriter(
+        action_queue_file
+    )
+
+
+    queue_writer.write(
+        groups,
+        engine
+    )
+
+
+    print(
+        f"Action queue created: {action_queue_file}"
+    )
 
 
     print()
