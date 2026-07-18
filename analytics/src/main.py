@@ -1,11 +1,12 @@
 """
 DriveMaintenance
-Analytics
+Path Analysis Runner
 """
 
 from analytics.src.constants import CSV_FILE
 from analytics.src.csv_loader import CsvLoader
 from analytics.src.repository import DriveIndexRepository
+from analytics.src.path_analysis import PathAnalyzer
 
 
 def main():
@@ -16,17 +17,37 @@ def main():
 
     repository = DriveIndexRepository(rows)
 
-    print()
+    analyzer = PathAnalyzer(repository)
 
-    print("=" * 40)
-    print("Repository Summary")
-    print("=" * 40)
-
-    print(f"Rows    : {repository.row_count():,}")
-    print(f"Columns : {len(repository.column_names())}")
+    result = analyzer.run()
 
     print()
-    print(repository.column_names())
+
+    print("=" * 50)
+    print("BLANK PATH ANALYSIS")
+    print("=" * 50)
+
+    print(
+        f"Blank Paths : {result['blank_count']:,}"
+    )
+
+    print()
+
+    print("MIME Distribution")
+
+    for mime, count in result["mime_distribution"].items():
+
+        print(
+            f"{count:>8,}  {mime}"
+        )
+
+    print()
+
+    print("Sample Files")
+
+    for item in result["samples"]:
+
+        print(item)
 
 
 if __name__ == "__main__":
