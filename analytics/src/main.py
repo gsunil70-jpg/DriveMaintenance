@@ -3,9 +3,9 @@ DriveMaintenance
 Analytics
 """
 
-from constants import CSV_FILE
-from csv_loader import CsvLoader
-from repository import DriveIndexRepository
+from analytics.src.constants import CSV_FILE
+from analytics.src.csv_loader import CsvLoader
+from analytics.src.repository import DriveIndexRepository
 
 
 def main():
@@ -19,17 +19,13 @@ def main():
     print()
 
     print("=" * 40)
-
     print("Repository Summary")
-
     print("=" * 40)
 
     print(f"Rows    : {repository.row_count():,}")
-
     print(f"Columns : {len(repository.column_names())}")
 
     print()
-
     print(repository.column_names())
 
 
