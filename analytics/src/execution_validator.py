@@ -30,7 +30,7 @@ class ExecutionValidator:
 
             "MANUAL_REVIEW",
 
-            "MOVE_TO_TRASH",
+            "REDIRECT_TO_CANONICAL",
 
         }
 
@@ -100,7 +100,7 @@ class ExecutionValidator:
             # Canonical reference safety rule
             #
 
-            if operation == "MOVE_TO_TRASH":
+            if operation == "REDIRECT_TO_CANONICAL":
 
 
                 canonical_id = (
@@ -132,7 +132,7 @@ class ExecutionValidator:
                     errors.append(
 
                         f"Row {index}: "
-                        "MOVE_TO_TRASH has no canonical reference."
+                        "REDIRECT_TO_CANONICAL has no canonical reference."
 
                     )
 

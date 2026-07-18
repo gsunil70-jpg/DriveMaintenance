@@ -40,7 +40,7 @@ class ExecutionPlanBuilder:
 
             elif decision == "REVIEW_REMOVE":
 
-                operation = "MOVE_TO_TRASH"
+                operation = "REDIRECT_TO_CANONICAL"
 
 
             else:

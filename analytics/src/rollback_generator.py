@@ -20,7 +20,7 @@ class RollbackGenerator:
 
         for record in self.execution_plan:
 
-            if record["Operation"] != "MOVE_TO_TRASH":
+            if record["Operation"] != "REDIRECT_TO_CANONICAL":
                 continue
 
             rollback.append(

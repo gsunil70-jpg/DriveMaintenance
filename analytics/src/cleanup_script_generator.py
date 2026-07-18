@@ -21,12 +21,12 @@ class CleanupScriptGenerator:
 
         for record in self.execution_plan:
 
-            if record["Operation"] != "MOVE_TO_TRASH":
+            if record["Operation"] != "REDIRECT_TO_CANONICAL":
                 continue
 
             commands.append(
                 {
-                    "Operation": "MOVE_TO_TRASH",
+                    "Operation": "REDIRECT_TO_CANONICAL",
                     "File ID": record["File ID"],
                     "File Name": record["File Name"],
                     "Reason": record["Reason"],
