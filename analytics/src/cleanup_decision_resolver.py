@@ -20,7 +20,12 @@ class CleanupDecisionResolver:
     }
 
 
-    def resolve(self, groups, engine):
+
+    def resolve(
+        self,
+        groups,
+        engine
+    ):
 
         plan = []
 
@@ -39,33 +44,51 @@ class CleanupDecisionResolver:
             files = group["files"]
 
 
+            canonical = (
+                recommendation.get(
+                    "canonical",
+                    {}
+                )
+            )
+
+
             if action == "KEEP_BACKUP_REMOVE_NON_BACKUP":
-
-
-                backup_files = [
-                    f for f in files
-                    if f.get("Inside Backup") == "TRUE"
-                ]
 
 
                 for file in files:
 
-                    if file.get("Inside Backup") == "TRUE":
+
+                    if file.get(
+                        "Inside Backup"
+                    ) == "TRUE":
+
 
                         decision = "KEEP"
 
+
                     else:
+
 
                         decision = "REVIEW_REMOVE"
 
 
+
                     plan.append(
+
                         self.create_record(
+
                             file,
+
                             decision,
-                            recommendation["reason"]
+
+                            recommendation["reason"],
+
+                            canonical
+
                         )
+
                     )
+
 
 
             else:
@@ -73,12 +96,21 @@ class CleanupDecisionResolver:
 
                 for file in files:
 
+
                     plan.append(
+
                         self.create_record(
+
                             file,
+
                             "REVIEW",
-                            recommendation["reason"]
+
+                            recommendation["reason"],
+
+                            canonical
+
                         )
+
                     )
 
 
@@ -86,33 +118,77 @@ class CleanupDecisionResolver:
 
 
 
+
+
     def create_record(
+
         self,
+
         file,
+
         decision,
-        reason
+
+        reason,
+
+        canonical
+
     ):
+
 
         return {
 
-            "Decision": decision,
+
+            "Decision":
+
+                decision,
+
 
             "File ID":
+
                 file.get("File ID"),
 
+
             "File Name":
+
                 file.get("Name"),
 
+
             "Path":
+
                 file.get("Path"),
 
+
             "Size":
+
                 file.get("Size"),
 
+
             "Inside Backup":
+
                 file.get("Inside Backup"),
 
+
             "Reason":
-                reason
+
+                reason,
+
+
+            #
+            # Canonical reference
+            #
+
+            "Canonical File ID":
+
+                canonical.get("File ID"),
+
+
+            "Canonical File Name":
+
+                canonical.get("File Name"),
+
+
+            "Canonical Path":
+
+                canonical.get("Path")
 
         }

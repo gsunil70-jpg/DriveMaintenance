@@ -12,12 +12,14 @@ class RecommendationEngine:
 
         self.scorer = CanonicalScorer()
 
+
     def recommend(self, duplicate_group):
 
         files = duplicate_group.get(
             "files",
             []
         )
+
 
         if not files:
 
@@ -29,11 +31,13 @@ class RecommendationEngine:
 
             }
 
+
         #
         # Score every file
         #
 
         ranked = []
+
 
         for file in files:
 
@@ -45,6 +49,7 @@ class RecommendationEngine:
                 )
 
             )
+
 
         #
         # Highest score first
@@ -58,7 +63,9 @@ class RecommendationEngine:
 
         )
 
-        keep = ranked[0][1]
+
+        canonical = ranked[0][1]
+
 
         review = [
 
@@ -68,26 +75,23 @@ class RecommendationEngine:
 
         ]
 
+
         #
         # Backup detection
         #
 
         backup_exists = any(
 
-            (
-
-                f.get(
-                    "Inside Backup",
-                    ""
-                ).upper()
-
-                == "TRUE"
-
-            )
+            f.get(
+                "Inside Backup",
+                ""
+            ).upper()
+            == "TRUE"
 
             for _, f in ranked
 
         )
+
 
         #
         # Recommendation
@@ -95,15 +99,17 @@ class RecommendationEngine:
 
         if backup_exists:
 
-            action = "KEEP_BACKUP_REMOVE_NON_BACKUP"
+            action = (
+                "KEEP_BACKUP_REMOVE_NON_BACKUP"
+            )
 
             reason = (
 
                 "Canonical copy selected "
-
                 "using scoring engine."
 
             )
+
 
         elif len(files) > 1:
 
@@ -112,10 +118,10 @@ class RecommendationEngine:
             reason = (
 
                 "Canonical copy selected "
-
                 "but no backup exists."
 
             )
+
 
         else:
 
@@ -123,17 +129,38 @@ class RecommendationEngine:
 
             reason = "Single file."
 
+
         return {
 
             "action": action,
 
             "reason": reason,
 
+
+            #
+            # Canonical reference
+            #
+
+            "canonical": {
+
+                "File ID":
+                    canonical.get("File ID"),
+
+                "File Name":
+                    canonical.get("Name"),
+
+                "Path":
+                    canonical.get("Path"),
+
+            },
+
+
             "keep": [
 
-                keep.get("File ID")
+                canonical.get("File ID")
 
             ],
+
 
             "review": [
 
@@ -142,6 +169,7 @@ class RecommendationEngine:
                 for f in review
 
             ],
+
 
             "canonical_score":
 
