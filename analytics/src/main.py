@@ -1,12 +1,12 @@
 """
 DriveMaintenance
-Path Analysis Runner
+Unique Storage Runner
 """
 
 from analytics.src.constants import CSV_FILE
 from analytics.src.csv_loader import CsvLoader
 from analytics.src.repository import DriveIndexRepository
-from analytics.src.path_analysis import PathAnalyzer
+from analytics.src.unique_storage_analysis import UniqueStorageAnalyzer
 
 
 def main():
@@ -17,37 +17,50 @@ def main():
 
     repository = DriveIndexRepository(rows)
 
-    analyzer = PathAnalyzer(repository)
+    analyzer = UniqueStorageAnalyzer(repository)
 
     result = analyzer.run()
 
+
     print()
 
-    print("=" * 50)
-    print("BLANK PATH ANALYSIS")
-    print("=" * 50)
+    print("=" * 60)
+    print("UNIQUE STORAGE ANALYSIS")
+    print("=" * 60)
+
+
+    print()
 
     print(
-        f"Blank Paths : {result['blank_count']:,}"
+        f"Unique Files : {result['unique_count']:,}"
     )
 
+    print(
+        f"True Size MB : {result['total_size']/1024/1024:,.2f}"
+    )
+
+
     print()
 
-    print("MIME Distribution")
+    print("Top MIME Types")
 
-    for mime, count in result["mime_distribution"].items():
+    for mime, size in result["mime_sizes"][:15]:
 
         print(
-            f"{count:>8,}  {mime}"
+            f"{size/1024/1024:>12,.2f} MB  {mime}"
         )
+
 
     print()
 
-    print("Sample Files")
+    print("Largest Unique Files")
 
-    for item in result["samples"]:
 
-        print(item)
+    for item in result["top_files"]:
+
+        print(
+            f"{item['size']/1024/1024:>10,.2f} MB  {item['name']}"
+        )
 
 
 if __name__ == "__main__":
