@@ -32,7 +32,7 @@ class DuplicateDetector:
 
         groups = defaultdict(list)
 
-        files = self.repository.rows()
+        files = self.repository.unique_rows()
 
 
         for file in files:
