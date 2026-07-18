@@ -10,6 +10,10 @@ Human approval required.
 """
 
 
+from pathlib import Path
+
+
+
 class CleanupDecisionResolver:
 
 
@@ -44,11 +48,9 @@ class CleanupDecisionResolver:
             files = group["files"]
 
 
-            canonical = (
-                recommendation.get(
-                    "canonical",
-                    {}
-                )
+            canonical = recommendation.get(
+                "canonical",
+                {}
             )
 
 
@@ -65,11 +67,31 @@ class CleanupDecisionResolver:
 
                         decision = "KEEP"
 
+                        resolution = (
+                            "KEEP_CANONICAL"
+                        )
+
 
                     else:
 
 
                         decision = "REVIEW_REMOVE"
+
+
+                        if self.same_folder(
+                            file,
+                            canonical
+                        ):
+
+                            resolution = (
+                                "CONSOLIDATE"
+                            )
+
+                        else:
+
+                            resolution = (
+                                "REDIRECT_TO_CANONICAL"
+                            )
 
 
 
@@ -83,7 +105,9 @@ class CleanupDecisionResolver:
 
                             recommendation["reason"],
 
-                            canonical
+                            canonical,
+
+                            resolution
 
                         )
 
@@ -107,14 +131,44 @@ class CleanupDecisionResolver:
 
                             recommendation["reason"],
 
-                            canonical
+                            canonical,
+
+                            "MANUAL_REVIEW"
 
                         )
 
                     )
 
 
+
         return plan
+
+
+
+
+    def same_folder(
+        self,
+        file,
+        canonical
+    ):
+
+        file_path = Path(
+            file.get("Path", "")
+        )
+
+
+        canonical_path = Path(
+            canonical.get("Path", "")
+        )
+
+
+        return (
+
+            file_path.parent
+            ==
+            canonical_path.parent
+
+        )
 
 
 
@@ -130,7 +184,9 @@ class CleanupDecisionResolver:
 
         reason,
 
-        canonical
+        canonical,
+
+        resolution
 
     ):
 
@@ -141,6 +197,11 @@ class CleanupDecisionResolver:
             "Decision":
 
                 decision,
+
+
+            "Resolution Mode":
+
+                resolution,
 
 
             "File ID":
@@ -172,10 +233,6 @@ class CleanupDecisionResolver:
 
                 reason,
 
-
-            #
-            # Canonical reference
-            #
 
             "Canonical File ID":
 
