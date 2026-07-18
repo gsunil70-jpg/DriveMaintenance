@@ -11,6 +11,9 @@ from analytics.src.duplicate_detector import DuplicateDetector
 from analytics.src.duplicate_report_writer import DuplicateReportWriter
 from analytics.src.recommendation_engine import RecommendationEngine
 from analytics.src.action_queue_writer import ActionQueueWriter
+from analytics.src.cleanup_decision_resolver import CleanupDecisionResolver
+from analytics.src.cleanup_plan_writer import CleanupPlanWriter
+
 
 
 def main():
@@ -21,17 +24,20 @@ def main():
         / "DriveIndex_RC2.csv"
     )
 
+
     loader = CsvLoader(csv_file)
 
     rows = loader.load()
 
     repository = DriveIndexRepository(rows)
 
+
     print()
 
     print("=" * 60)
     print("REAL DUPLICATE ANALYSIS")
     print("=" * 60)
+
 
     detector = DuplicateDetector(
         repository
@@ -41,6 +47,46 @@ def main():
 
 
     engine = RecommendationEngine()
+
+
+    resolver = CleanupDecisionResolver()
+
+    cleanup_plan = resolver.resolve(
+        groups,
+        engine
+    )
+
+
+    cleanup_file = (
+        Path(__file__).resolve().parent.parent
+        / "reports"
+        / "cleanup_plan.csv"
+    )
+
+
+    cleanup_writer = CleanupPlanWriter(
+        cleanup_file
+    )
+
+    cleanup_writer.write(
+        cleanup_plan
+    )
+
+
+    print()
+
+    print("=" * 60)
+    print("CLEANUP PLAN")
+    print("=" * 60)
+
+    print(
+        f"Plan Records : {len(cleanup_plan)}"
+    )
+
+    print(
+        f"Output       : {cleanup_file}"
+    )
+
 
     print()
 
@@ -73,11 +119,14 @@ def main():
     )
 
 
-    writer = DuplicateReportWriter(
+    report_writer = DuplicateReportWriter(
         report_file
     )
 
-    writer.write(groups)
+    report_writer.write(
+        groups
+    )
+
 
     action_queue_file = (
         Path(__file__).resolve().parent.parent
@@ -97,6 +146,8 @@ def main():
     )
 
 
+    print()
+
     print(
         f"Action queue created: {action_queue_file}"
     )
@@ -107,9 +158,6 @@ def main():
     print(
         f"Duplicate Groups : {len(groups)}"
     )
-
-
-    print()
 
 
     for group in groups[:20]:
