@@ -1,14 +1,18 @@
 /**
  * ============================================================
- * DriveMaintenance v1.3
+ * DriveMaintenance v1.4
  * Scan Controller
  * ============================================================
  *
  * Executes one Drive scan batch.
- * Orchestrates:
- *   DriveScanner
- *   DriveIndex
- *   ReportWriter
+ *
+ * Responsibilities
+ * ----------------
+ * • Detect new vs resumed scan
+ * • Reset Drive Index only for a new scan
+ * • Invoke DriveScanner
+ * • Append batch rows
+ * • Never manage continuation tokens
  * ============================================================
  */
 
@@ -29,35 +33,69 @@ class ScanController {
       "Scan execution started"
     );
 
-    const index = new DriveIndex();
+    //----------------------------------------------------------
+    // Detect whether this is a NEW scan or a RESUME
+    //----------------------------------------------------------
 
-    const scanner = new DriveScanner(
-      this.logger,
-      index,
-      this.stateManager
-    );
+    const existingState =
+      this.stateManager.get("SCAN_STATE");
+
+    const writer =
+      new ReportWriter();
+
+    if (!existingState) {
+
+      writer.clearSheet(
+        CONFIG.INDEX_SHEET_NAME
+      );
+
+      this.logger.log(
+        "CONTROLLER",
+        "NEW_SCAN",
+        "Drive Index cleared for fresh scan"
+      );
+
+    }
+
+    //----------------------------------------------------------
+    // Scan one batch
+    //----------------------------------------------------------
+
+    const index =
+      new DriveIndex();
+
+    const scanner =
+      new DriveScanner(
+        this.logger,
+        index,
+        this.stateManager
+      );
 
     scanner.scanBatch();
 
-    const files = index.getFiles();
+    //----------------------------------------------------------
+    // Write scanned records
+    //----------------------------------------------------------
+
+    const files =
+      index.getFiles();
 
     if (files.length > 0) {
 
-      const rows = files.map(file => [
+      const rows =
+        files.map(file => [
 
-        file.fileId,
-        file.name,
-        file.mimeType,
-        file.size,
-        file.checksum,
-        file.createdDate,
-        file.modifiedDate,
-        file.path,
-        file.insideBackup
+          file.fileId,
+          file.name,
+          file.mimeType,
+          file.size,
+          file.checksum,
+          file.createdDate,
+          file.modifiedDate,
+          file.path,
+          file.insideBackup
 
-      ]);
-
-      const writer = new ReportWriter();
+        ]);
 
       writer.appendRows(
 
@@ -95,18 +133,23 @@ class ScanController {
 
     }
 
-    const state =
-      this.stateManager.get("SCAN_STATE");
+    //----------------------------------------------------------
+    // Scan completion logging
+    //----------------------------------------------------------
 
-    if (state && state.completed) {
+    if (!this.stateManager.get("SCAN_STATE")) {
 
       this.logger.log(
         "CONTROLLER",
         "SCAN_COMPLETE",
-        "Entire Drive has been indexed"
+        "Entire Drive indexed successfully"
       );
 
     }
+
+    //----------------------------------------------------------
+    // Print audit log
+    //----------------------------------------------------------
 
     this.logger.print();
 

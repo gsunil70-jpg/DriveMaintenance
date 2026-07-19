@@ -1,133 +1,143 @@
 /**
  * ============================================================
- * DriveMaintenance v1.0
+ * DriveMaintenance v1.3
  * Constants
  * ============================================================
- * Shared constants used throughout the project.
- * This file should contain only constant definitions.
+ *
+ * Central configuration and sheet definitions.
+ * This file should contain only constants.
+ * ============================================================
  */
+
 
 /**
  * Google Spreadsheet Configuration
  */
 const SPREADSHEET_ID = "1X9Uov60kbo0mMppljpYe6P11S8RBi7cg4Vc7c8ukfas";
 
+
 /**
- * Spreadsheet sheet names
+ * Spreadsheet Sheet Names
  */
-const SHEETS = Object.freeze({
+const SHEETS = {
+
   DRIVE_INDEX: "Drive Index",
-  ANALYSIS: "Analysis",
-  MIGRATION_PLAN: "Migration Plan",
-  EXECUTION_LOG: "Execution Log",
-  DASHBOARD: "Dashboard",
+
+  STORAGE_CATALOG: "Storage Catalog",
+
   DUPLICATE_REPORT: "Duplicate Report",
-  ACTION_QUEUE: "Action Queue"
-});
+
+  ACTION_QUEUE: "Action Queue",
+
+  ANALYSIS: "Analysis",
+
+  AUDIT_LOG: "Audit Log"
+
+};
+
 
 /**
- * Storage providers
+ * Backup Configuration
  */
-const PROVIDER = Object.freeze({
-  GOOGLE_DRIVE: "GoogleDrive"
-});
+const BACKUP_CONFIG = {
+
+  BACKUP_FOLDER_NAME: "Drive Backup",
+
+  MOVE_TO_TRASH_ONLY: true
+
+};
+
 
 /**
- * Object types
+ * Scanner Configuration
  */
-const OBJECT_TYPE = Object.freeze({
-  FILE: "FILE",
-  FOLDER: "FOLDER",
-  SHORTCUT: "SHORTCUT",
-  UNKNOWN: "UNKNOWN"
-});
+const SCAN_CONFIG = {
+
+  VERSION: "1.3",
+
+  // Number of files processed per execution
+  SCAN_BATCH_SIZE: 500,
+
+  // Maximum runtime safety margin
+  MAX_RUNTIME_SECONDS: 300,
+
+  // Continue token storage key
+  STATE_KEY: "DRIVE_SCAN_STATE"
+
+};
+
 
 /**
- * Storage classification
- */
-const CLASSIFICATION = Object.freeze({
-  UNKNOWN: "UNKNOWN",
-  SAFE: "SAFE",
-  DUPLICATE: "DUPLICATE",
-  MISSING_BACKUP: "MISSING_BACKUP",
-  BACKUP_ONLY: "BACKUP_ONLY",
-  CONFLICT: "CONFLICT",
-  REVIEW_REQUIRED: "REVIEW_REQUIRED"
-});
-
-/**
- * Planned execution actions
+ * Drive Index Columns
  *
- * These represent physical actions that may eventually
- * be executed against Google Drive.
+ * Keep this aligned with Drive Index sheet.
  */
-const ACTION = Object.freeze({
-  NONE: "NONE",
-  KEEP: "KEEP",
-  MOVE: "MOVE",
-  TRASH: "TRASH",
-  REVIEW: "REVIEW"
-});
+const DRIVE_INDEX_COLUMNS = {
+
+  ID: "id",
+
+  NAME: "name",
+
+  MIME_TYPE: "mimeType",
+
+  SIZE: "size",
+
+  CREATED: "created",
+
+  UPDATED: "updated",
+
+  OWNER: "owner",
+
+  PATH: "path",
+
+  TRASHED: "trashed"
+
+};
+
 
 /**
- * Recommendation Engine actions
- *
- * These represent decisions produced by the
- * Recommendation Engine.
+ * Storage Classification
  */
-const RECOMMENDATION_ACTION = Object.freeze({
+const STORAGE_CLASS = {
+
+  ACTIVE: "ACTIVE",
+
+  ARCHIVE: "ARCHIVE",
+
+  BACKUP: "BACKUP",
+
+  REVIEW: "REVIEW",
+
+  DUPLICATE: "DUPLICATE"
+
+};
+
+
+/**
+ * Recommendation Actions
+ */
+const ACTIONS = {
+
   KEEP: "KEEP",
-  VERIFY_CHECKSUM: "VERIFY_CHECKSUM",
+
+  REVIEW: "REVIEW",
+
+  ARCHIVE: "ARCHIVE",
+
   MOVE_TO_BACKUP: "MOVE_TO_BACKUP",
-  MOVE_TO_REVIEW: "MOVE_TO_REVIEW",
-  MANUAL_REVIEW: "MANUAL_REVIEW"
-});
+
+  MOVE_TO_TRASH: "MOVE_TO_TRASH"
+
+};
+
 
 /**
- * Recommendation confidence
+ * Logging
  */
-const CONFIDENCE_LEVEL = Object.freeze({
-  VERY_LOW: "VERY_LOW",
-  LOW: "LOW",
-  MEDIUM: "MEDIUM",
-  HIGH: "HIGH",
-  VERY_HIGH: "VERY_HIGH"
-});
+const LOG_CONFIG = {
 
-/**
- * Recommendation risk
- */
-const RISK_LEVEL = Object.freeze({
-  LOW: "LOW",
-  MEDIUM: "MEDIUM",
-  HIGH: "HIGH"
-});
+  ENABLED: true,
 
-/**
- * Recommendation priority
- */
-const PRIORITY = Object.freeze({
-  HIGH: "HIGH",
-  MEDIUM: "MEDIUM",
-  LOW: "LOW"
-});
+  LEVEL: "INFO"
 
-/**
- * Duplicate verification status
- */
-const VERIFICATION_STATUS = Object.freeze({
-  UNVERIFIED: "UNVERIFIED",
-  VERIFIED: "VERIFIED",
-  FAILED: "FAILED"
-});
-
-/**
- * Execution status
- */
-const EXECUTION_STATUS = Object.freeze({
-  PENDING: "PENDING",
-  SUCCESS: "SUCCESS",
-  FAILED: "FAILED",
-  SKIPPED: "SKIPPED",
-  COMPLETED: "COMPLETED"
-});
+};
