@@ -1,79 +1,14 @@
-/**
- * ============================================================
- * DriveMaintenance v1.0
- * Recommendation Runner
- * ============================================================
- *
- * Orchestrates the recommendation workflow.
- *
- * Workflow
- * --------
- * Duplicate Detector
- *        ↓
- * Recommendation Engine
- *        ↓
- * Action Queue
- *
- * This file contains NO business rules.
- * ============================================================
- */
-
 function generateActionQueue() {
 
-  Logger.log(
-    "Recommendation workflow started."
-  );
+  const duplicateGroups = detectDuplicateGroups();
 
-
-  // ----------------------------------------------------------
-  // Detect duplicate groups
-  // ----------------------------------------------------------
-
-  const duplicateGroups =
-    detectDuplicateGroups();
-
-
-  Logger.log(
-    duplicateGroups.length +
-    " duplicate groups detected."
-  );
-
-
-  // ----------------------------------------------------------
-  // Generate recommendations
-  // ----------------------------------------------------------
-
-  const engine =
-    new RecommendationEngine();
-
+  const engine = new RecommendationEngine();
 
   const recommendations =
-    engine.generate(
-      duplicateGroups
-    );
+    engine.generate(duplicateGroups);
 
+  const queue = new ActionQueue();
 
-  Logger.log(
-    recommendations.length +
-    " recommendations generated."
-  );
-
-
-  // ----------------------------------------------------------
-  // Build Action Queue
-  // ----------------------------------------------------------
-
-  const queue =
-    new ActionQueue();
-
-
-  queue.write(
-    recommendations
-  );
-
-
-  Logger.log(
-    "Recommendation workflow completed."
-  );
+  queue.write(recommendations);
 
 }

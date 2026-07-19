@@ -9,10 +9,10 @@
  * Responsibilities
  * ----------------
  * • Detect new vs resumed scan
- * • Reset Drive Index only for a new scan
+ * • Clear Drive Index only for a new scan
  * • Invoke DriveScanner
  * • Append batch rows
- * • Never manage continuation tokens
+ * • Clear scan state when indexing completes
  * ============================================================
  */
 
@@ -34,7 +34,7 @@ class ScanController {
     );
 
     //----------------------------------------------------------
-    // Detect whether this is a NEW scan or a RESUME
+    // Detect new scan
     //----------------------------------------------------------
 
     const existingState =
@@ -52,13 +52,13 @@ class ScanController {
       this.logger.log(
         "CONTROLLER",
         "NEW_SCAN",
-        "Drive Index cleared for fresh scan"
+        "Drive Index cleared"
       );
 
     }
 
     //----------------------------------------------------------
-    // Scan one batch
+    // Scan batch
     //----------------------------------------------------------
 
     const index =
@@ -74,7 +74,7 @@ class ScanController {
     scanner.scanBatch();
 
     //----------------------------------------------------------
-    // Write scanned records
+    // Append results
     //----------------------------------------------------------
 
     const files =
@@ -82,20 +82,19 @@ class ScanController {
 
     if (files.length > 0) {
 
-      const rows =
-        files.map(file => [
+      const rows = files.map(file => [
 
-          file.fileId,
-          file.name,
-          file.mimeType,
-          file.size,
-          file.checksum,
-          file.createdDate,
-          file.modifiedDate,
-          file.path,
-          file.insideBackup
+        file.fileId,
+        file.name,
+        file.mimeType,
+        file.size,
+        file.checksum,
+        file.createdDate,
+        file.modifiedDate,
+        file.path,
+        file.insideBackup
 
-        ]);
+      ]);
 
       writer.appendRows(
 
@@ -134,22 +133,31 @@ class ScanController {
     }
 
     //----------------------------------------------------------
-    // Scan completion logging
+    // Completed?
     //----------------------------------------------------------
 
-    if (!this.stateManager.get("SCAN_STATE")) {
+    const state =
+      this.stateManager.get("SCAN_STATE");
+
+    if (state && state.completed) {
 
       this.logger.log(
         "CONTROLLER",
         "SCAN_COMPLETE",
-        "Entire Drive indexed successfully"
+        "Entire Drive has been indexed"
+      );
+
+      this.stateManager.clear(
+        "SCAN_STATE"
+      );
+
+      this.logger.log(
+        "CONTROLLER",
+        "STATE_CLEARED",
+        "SCAN_STATE removed"
       );
 
     }
-
-    //----------------------------------------------------------
-    // Print audit log
-    //----------------------------------------------------------
 
     this.logger.print();
 

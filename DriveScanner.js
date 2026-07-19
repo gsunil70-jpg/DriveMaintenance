@@ -130,38 +130,29 @@ class DriveScanner {
       state.completed = true;
 
     }
-if (state.completed) {
 
-  this.stateManager.clear(
-    "SCAN_STATE"
-  );
+    this.stateManager.save(
+      "SCAN_STATE",
+      state
+    );
 
-} else {
+    this.logger.log(
+      "SCAN",
+      "BATCH_COMPLETED",
+      "Processed " + processed + " file(s)"
+    );
 
-  this.stateManager.save(
-    "SCAN_STATE",
-    state
-  );
+    if (state.completed) {
 
-}
+      this.logger.log(
+        "SCAN",
+        "COMPLETE",
+        "Drive scan completed"
+      );
 
-this.logger.log(
-  "SCAN",
-  "BATCH_COMPLETED",
-  "Processed " + processed + " file(s)"
-);
+    }
 
-if (state.completed) {
-
-  this.logger.log(
-    "SCAN",
-    "COMPLETE",
-    "Drive scan completed"
-  );
-
-}
-
-return this.index;
+    return this.index;
 
   }
 
